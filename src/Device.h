@@ -7,5 +7,7 @@ class Device {
     int getDevIndex(std::string serial);
 
     public:
-    void findDev(std::string serial);
+    Device(std::string serial);
+    void init(uint32_t freq);
+    std::string s = "hello";
 };
