@@ -2,18 +2,9 @@
 #include <iostream>
 
 static void callback(unsigned char *buf, uint32_t len, void *ctx) {
-    Device* dev = (Device *) ctx;
-    std::cout << dev->s << std::endl;
-}
-
-int Device::getDevIndex(std::string serial) {
-    if (rtlsdr_get_device_count() == 0) {
-        return -1;
+    for (int i = 0; i < len; i++) {
+        std::cout << std::hex << (int)buf[i] << std::endl;
     }
-    if (serial == "-") {
-        return 0;
-    }
-    return rtlsdr_get_index_by_serial(serial.c_str());
 }
 
 Device::Device(std::string serial) {
@@ -26,6 +17,21 @@ Device::Device(std::string serial) {
         throw "Device could not be openned.";
     }
 }
+
+Device::~Device() {
+    rtlsdr_close(mDev);
+}
+
+int Device::getDevIndex(std::string serial) {
+    if (rtlsdr_get_device_count() == 0) {
+        return -1;
+    }
+    if (serial == "-") {
+        return 0;
+    }
+    return rtlsdr_get_index_by_serial(serial.c_str());
+}
+
 
 
 void Device::init(uint32_t freq) {

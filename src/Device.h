@@ -8,6 +8,6 @@ class Device {
 
     public:
     Device(std::string serial);
+    ~Device();
     void init(uint32_t freq);
-    std::string s = "hello";
 };
