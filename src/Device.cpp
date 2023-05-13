@@ -1,10 +1,10 @@
 #include "Device.h"
 #include <iostream>
+#include <fstream>
 
 static void callback(unsigned char *buf, uint32_t len, void *ctx) {
-    for (int i = 0; i < len; i++) {
-        std::cout << std::hex << (int)buf[i] << std::endl;
-    }
+    std::ofstream* file = (std::ofstream*) ctx;
+    file->write((const char*) buf, len);
 }
 
 Device::Device(std::string serial) {
@@ -19,6 +19,7 @@ Device::Device(std::string serial) {
 }
 
 Device::~Device() {
+    rtlsdr_cancel_async(mDev);
     rtlsdr_close(mDev);
 }
 
@@ -35,11 +36,12 @@ int Device::getDevIndex(std::string serial) {
 
 
 void Device::init(uint32_t freq) {
-    rtlsdr_set_center_freq(mDev, freq);
+    rtlsdr_set_center_freq(mDev, 103300000);
     rtlsdr_set_sample_rate(mDev, 2400000);
     rtlsdr_set_tuner_gain_mode(mDev, 0);
-    rtlsdr_set_tuner_bandwidth(mDev, 40000);
+    rtlsdr_set_tuner_bandwidth(mDev, 175000);
     rtlsdr_reset_buffer(mDev);
 
-    rtlsdr_read_async(mDev, callback, this, 12, (16 * 16384));
+    std::ofstream file("myfile.bin", std::ios::binary);
+    rtlsdr_read_async(mDev, callback, &file, 0, 0);
 }

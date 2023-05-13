@@ -11,17 +11,13 @@ int main(int argc, char **argv) {
         std::cout << i << " " << manufact << " " << product << " " << serial << std::endl;
     }
 
-    Device* dev;
-
     try {
-        dev = new Device("-");
+        Device dev("-");
+        dev.init(137100000);
     } catch (const char* msg) {
         std::cerr << msg << std::endl;
         return 1;
     }
 
-    dev->init(137100000);
-
-    delete dev;
     return 0;
 }
