@@ -1,23 +1,38 @@
 #include <iostream>
 #include <rtl-sdr.h>
+#include <thread>
+#include <csignal>
+#include "IQueue.h"
 #include "Device.h"
+#include "Demodder.h"
+
+std::atomic<bool> quit;
+
+void signalHandler( int signum ) {
+    quit.store(true);
+}
+
 
 int main(int argc, char **argv) {
-    char manufact[256], product[256], serial[256];
-    int device_count = rtlsdr_get_device_count();
-
-    for (int i = 0; i < device_count; i++) {
-        rtlsdr_get_device_usb_strings(i, manufact, product, serial);
-        std::cout << i << " " << manufact << " " << product << " " << serial << std::endl;
-    }
-
+    Device* dev;
+    signal(SIGINT, signalHandler);
+    quit.store(false);
     try {
-        Device dev("-");
-        dev.init(137100000);
+        dev = new Device("-", &quit);
     } catch (const char* msg) {
         std::cerr << msg << std::endl;
         return 1;
     }
+    Demodder dem(&dev->sampleQueue, &quit);
 
+    std::thread bufReader(&Demodder::bufferToComplex, &dem);
+    std::thread demod(&Demodder::demodulate, &dem);
+    dev->init(3);
+
+    bufReader.join();
+    demod.join();
+
+
+    delete dev;
     return 0;
 }

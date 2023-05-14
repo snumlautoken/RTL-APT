@@ -1,17 +1,21 @@
 #pragma once
 #include <complex>
 #include <vector>
-#include <fstream>
+#include <queue>
+#include <atomic>
+#include "../debug/AudioFile.h"
+#include "IQueue.h"
 
 class Demodder {
     private:
-    std::vector<std::complex<double>> iqSamples;
-    std::ifstream* inFile;
-
+    IQueue<u_char>* sampleQueue;
+    IQueue<std::complex<float>> iQueue;
+    std::atomic<bool>* quit;
     public:
-    Demodder(std::ifstream * f) : inFile(f){}
+    AudioFile<float> a;
+    Demodder(IQueue<u_char>* q, std::atomic<bool> * quit);
     ~Demodder();
     void bufferToComplex();
     void demodulate();
-    std::vector<double> fmSamples;
+    std::vector<float> fmSamples;
 };
