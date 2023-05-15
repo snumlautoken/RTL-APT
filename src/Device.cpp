@@ -3,15 +3,9 @@
 
 
 static void callback(unsigned char *buf, uint32_t len, void *ctx) {
-    IQueue<std::array<u_char,16*32*512>>* q = (IQueue<std::array<u_char,16*32*512>>*) ctx;
+    IQueue<unsigned char*>* q = (IQueue<unsigned char*>*) ctx;
 
-    std::array<u_char,16*32*512> a;
-
-    for (int i = 0; i < 16*32*512; i++) {
-        a[i] = buf[i];
-    }
-
-    q->push(a);
+    q->push(buf);
 }
 
 Device::Device(std::string serial) {

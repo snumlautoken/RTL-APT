@@ -2,14 +2,12 @@
 #include <iostream>
 
 void Demodder::demodulate() {
-
+    float real0 = 1;
+    float imag0 = 1;
     while (!quit->load())
     {
-        float real0 = 0;
-        float imag0 = 0;
         if (sampleQueue->size()) {
-            std::array<u_char, 16*32*512> arr = sampleQueue->front();
-            sampleQueue->pop();
+            unsigned char* arr = sampleQueue->pop();
             for (int i = 0; i + 1 < 16*32*512; i += 2*decimate) {
                 float real1 = ((float)arr[i]) - 127.5;
                 float imag1 = ((float)arr[i+1]) - 127.5;
@@ -24,7 +22,7 @@ void Demodder::demodulate() {
     }
 }
 
-Demodder::Demodder(IQueue<std::array<u_char, 16*32*512>>* q, std::atomic<bool> * quit) : quit(quit) {
+Demodder::Demodder(IQueue<unsigned char*>* q, std::atomic<bool> * quit) : quit(quit) {
     sampleQueue = q;
     a.setNumChannels(1);
     a.isMono();
