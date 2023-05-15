@@ -3,11 +3,7 @@
 
 
 static void callback(unsigned char *buf, uint32_t len, void *ctx) {
-    Device* d = (Device*) ctx;
-    if (d->quit->load()) {
-        rtlsdr_cancel_async(d->mDev);
-        return;
-    }
+    IQueue<std::array<u_char,16*32*512>>* q = (IQueue<std::array<u_char,16*32*512>>*) ctx;
 
     std::array<u_char,16*32*512> a;
 
@@ -15,11 +11,10 @@ static void callback(unsigned char *buf, uint32_t len, void *ctx) {
         a[i] = buf[i];
     }
 
-    d->sampleQueue.push(a);
+    q->push(a);
 }
 
-Device::Device(std::string serial, std::atomic<bool> * q) : quit(q) {
-    quit = q;
+Device::Device(std::string serial) {
     int dev_index = getDevIndex(serial);
     if (dev_index < 0) {
         throw "No device found.";
@@ -47,12 +42,12 @@ int Device::getDevIndex(std::string serial) {
 
 
 
-void Device::init(uint32_t freq) {
-    rtlsdr_set_center_freq(mDev, 103300000);
+void Device::init() {
+    rtlsdr_set_center_freq(mDev, 101900000);
     rtlsdr_set_sample_rate(mDev, 2400000);
     rtlsdr_set_tuner_gain_mode(mDev, 0);
     rtlsdr_set_tuner_bandwidth(mDev, 175000);
     rtlsdr_reset_buffer(mDev);
 
-    rtlsdr_read_async(mDev, callback, this, 0, 0);
+    rtlsdr_read_async(mDev, callback, &sampleQueue, 0, 0);
 }

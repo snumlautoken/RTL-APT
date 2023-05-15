@@ -13,7 +13,7 @@ class Device {
     std::atomic<bool>* quit;
     rtlsdr_dev_t* mDev = nullptr;
     IQueue<std::array<u_char, 16*32*512>> sampleQueue;
-    Device(std::string serial, std::atomic<bool> * q);
+    Device(std::string serial);
     ~Device();
-    void init(uint32_t freq);
+    void init();
 };

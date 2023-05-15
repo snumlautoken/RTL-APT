@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     signal(SIGINT, signalHandler);
     quit.store(false);
     try {
-        dev = new Device("-", &quit);
+        dev = new Device("-");
     } catch (const char* msg) {
         std::cerr << msg << std::endl;
         return 1;
@@ -26,9 +26,16 @@ int main(int argc, char **argv) {
     Demodder dem(&dev->sampleQueue, &quit);
 
     std::thread demod(&Demodder::demodulate, &dem);
-    dev->init(3);
+    std::thread reader(&Device::init, dev);
+
+    while (!quit.load()) {
+        usleep(100000000);
+    }
+
+    rtlsdr_cancel_async(dev->mDev);
 
     demod.join();
+    reader.join();
 
 
     delete dev;
