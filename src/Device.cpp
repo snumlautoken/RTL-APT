@@ -8,9 +8,14 @@ static void callback(unsigned char *buf, uint32_t len, void *ctx) {
         rtlsdr_cancel_async(d->mDev);
         return;
     }
-    for (int i = 0; i < len; i++) {
-        d->sampleQueue.push(buf[i]);
+
+    std::array<u_char,16*32*512> a;
+
+    for (int i = 0; i < 16*32*512; i++) {
+        a[i] = buf[i];
     }
+
+    d->sampleQueue.push(a);
 }
 
 Device::Device(std::string serial, std::atomic<bool> * q) : quit(q) {

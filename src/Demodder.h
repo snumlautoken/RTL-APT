@@ -3,17 +3,17 @@
 #include <vector>
 #include <queue>
 #include <atomic>
+#include <array>
 #include "../debug/AudioFile.h"
 #include "IQueue.h"
 
 class Demodder {
     private:
-    IQueue<u_char>* sampleQueue;
-    IQueue<std::complex<float>> iQueue;
+    IQueue<std::array<u_char, 16*32*512>>* sampleQueue;
     std::atomic<bool>* quit;
     public:
     AudioFile<float> a;
-    Demodder(IQueue<u_char>* q, std::atomic<bool> * quit);
+    Demodder(IQueue<std::array<u_char, 16*32*512>>* q, std::atomic<bool> * quit);
     ~Demodder();
     void bufferToComplex();
     void demodulate();

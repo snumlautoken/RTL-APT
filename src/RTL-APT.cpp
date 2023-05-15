@@ -25,11 +25,9 @@ int main(int argc, char **argv) {
     }
     Demodder dem(&dev->sampleQueue, &quit);
 
-    std::thread bufReader(&Demodder::bufferToComplex, &dem);
     std::thread demod(&Demodder::demodulate, &dem);
     dev->init(3);
 
-    bufReader.join();
     demod.join();
 
 
