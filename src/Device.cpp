@@ -20,7 +20,6 @@ Device::Device(std::string serial) {
 }
 
 Device::~Device() {
-    rtlsdr_cancel_async(mDev);
     rtlsdr_close(mDev);
 }
 

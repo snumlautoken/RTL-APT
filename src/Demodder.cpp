@@ -30,7 +30,6 @@ Demodder::Demodder(IQueue<unsigned char*>* q, std::atomic<bool> * quit) : quit(q
 }
 
 Demodder::~Demodder() {
-    std::cout << a.samples[0].size() << std::endl;
     a.save("Test.wav", AudioFileFormat::Wave);
 
 }
