@@ -37,7 +37,7 @@ int Device::getDevIndex(std::string serial) {
 
 void Device::init() {
     rtlsdr_set_center_freq(mDev, 101900000);
-    rtlsdr_set_sample_rate(mDev, 2400000);
+    rtlsdr_set_sample_rate(mDev, 250000);
     rtlsdr_set_tuner_gain_mode(mDev, 0);
     rtlsdr_set_tuner_bandwidth(mDev, 175000);
     rtlsdr_reset_buffer(mDev);

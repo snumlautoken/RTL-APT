@@ -1,17 +1,23 @@
-#include "Demodder.h"
+#include "../src/Demodder.h"
 #include <iostream>
+#include <ctime>
 
 void Demodder::demodulate() {
-    while (!quit->load())
-    {
         float real0 = 1;
         float imag0 = 1;
+        std::ifstream inFile("test.bin", std::ios::binary);
+        u_char buf[16*32*512];
+        inFile.read((char*)buf, 16*32*512);
 
-        if (sampleQueue->size()) {
-            unsigned char* arr = sampleQueue->pop();
-            for (int i = 0; i + 1 < 16*32*512; i += 2) {
-                float real1 = ((float)arr[i]) - 127.5;
-                float imag1 = ((float)arr[i+1]) - 127.5;
+        FFTFilter filter(0,0);
+        filter.filter(buf);
+
+
+        return;
+
+            for (u_long i = 0; i + 1 < 16*32*512; i += 2) {
+                float real1 = 0;
+                float imag1 = 0;
                 float fmSample = (real0 * (imag1 - imag0)
                                 - imag0 * (real1 - real0))
                                 /(real0 * real0 + imag0 * imag0);
@@ -19,8 +25,7 @@ void Demodder::demodulate() {
                 imag0 = imag1;
                 a.samples[0].push_back(fmSample);
             }
-        }
-    }
+        std::cout << "hey" << std::endl;
 }
 
 
