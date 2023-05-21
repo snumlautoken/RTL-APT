@@ -1,7 +1,7 @@
 #include "FFTFilter.h"
 
-static double filter[257] {
-        -4.95194261e-05, -1.28145567e-04, -1.84297773e-04, -2.07076836e-04,
+const double filterVals[257] = {
+       -4.95194261e-05, -1.28145567e-04, -1.84297773e-04, -2.07076836e-04,
        -1.91131624e-04, -1.37795833e-04, -5.51882187e-05,  4.28113973e-05,
         1.38636454e-04,  2.13910457e-04,  2.52716673e-04,  2.44731837e-04,
         1.87648782e-04,  8.83635940e-05, -3.74399132e-05, -1.67422789e-04,
@@ -66,24 +66,45 @@ static double filter[257] {
         1.38636454e-04,  4.28113973e-05, -5.51882187e-05, -1.37795833e-04,
        -1.91131624e-04, -2.07076836e-04, -1.84297773e-04, -1.28145567e-04,
        -4.95194261e-05
-    };
+       };
 
-
-std::array<std::complex<double>, ARR_SIZE> FFTFilter::filter(unsigned char input[ARR_SIZE*2]) {
-    for (int i = 0; i < ARR_SIZE; i+=2) {
-        in[i/2] = std::complex<double>(double(input[i])-127.5, double(input[i+1])-127.5);
+std::array<std::complex<double>, 2*ARR_SIZE> FFTFilter::filter(unsigned char input[ARR_SIZE*2]) {
+    for (int i = 0; i < ARR_SIZE*2; i+=2) {
+        sampleArr[i/2] = std::complex<double>(double(input[i])-127.5, double(input[i+1])-127.5);
+        sampleArr[ARR_SIZE+i/2] = 0;
     }
+
     fftw_execute(p);
 
-    for (auto elem : out) {
-        std::cout << elem << std::endl;
+    for (int i = 0; i < ARR_SIZE*2; i++) {
+        sampleArr[i] *= filterOut[i];
     }
 
-    return out;
+    fftw_execute(ip);
+
+    for (int i = 0; i < ARR_SIZE; i++) {
+        sampleArr[i] /= ARR_SIZE*2;
+    }
+
+    return sampleArr;
 }
 
 FFTFilter::FFTFilter(unsigned int filterLength, int freqCutoff) 
 : length(filterLength), cutoff(freqCutoff) {
-    p  = fftw_plan_dft_1d(ARR_SIZE, reinterpret_cast<fftw_complex*>(&in[0]), reinterpret_cast<fftw_complex*>(&out[0]), FFTW_FORWARD, FFTW_MEASURE);
-    ip = fftw_plan_dft_1d(ARR_SIZE, reinterpret_cast<fftw_complex*>(&in[0]), reinterpret_cast<fftw_complex*>(&out[0]), FFTW_BACKWARD, FFTW_MEASURE);
+    std::cout << "Initialize fft-filter" << std::endl;
+    p  = fftw_plan_dft_1d(ARR_SIZE*2, reinterpret_cast<fftw_complex*>(&sampleArr[0]), reinterpret_cast<fftw_complex*>(&sampleArr[0]), FFTW_FORWARD, FFTW_MEASURE);
+    ip = fftw_plan_dft_1d(ARR_SIZE*2, reinterpret_cast<fftw_complex*>(&sampleArr[0]), reinterpret_cast<fftw_complex*>(&sampleArr[0]), FFTW_BACKWARD, FFTW_MEASURE);
+
+    std::array<double,2*ARR_SIZE> filterIn;
+    fftw_plan fp = fftw_plan_dft_r2c_1d(ARR_SIZE*2, filterIn.data(), reinterpret_cast<fftw_complex*>(&filterOut[0]), FFTW_MEASURE);
+
+    filterIn.fill(0.0);
+    for (int i = 0; i < 257; i++) {
+        filterIn[i] = filterVals[i];
+    }
+
+    fftw_execute(fp);
+
+    fftw_destroy_plan(fp);
+    std::cout << "Finish initializing fft-filter" << std::endl;
 }

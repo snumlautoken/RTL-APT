@@ -2,17 +2,17 @@
 #include <vector>
 #include <atomic>
 #include <array>
+#include <memory>
 #include "../debug/AudioFile.h"
-#include "IQueue.h"
 #include "FFTFilter.h"
+#include "IQueue.h"
 
 class Demodder {
     private:
     IQueue<unsigned char*>* sampleQueue;
     std::atomic<bool>* quit;
     std::vector<float> fmSamples;
-    std::array<float,16*32*512> convolve(unsigned char iqBuf[], const float filter[]);
-    FFTFilter filter;
+    std::unique_ptr<FFTFilter> filter;
     public:
     AudioFile<float> a;
     Demodder(IQueue<unsigned char*>* q, std::atomic<bool>* quit);
