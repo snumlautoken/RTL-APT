@@ -9,12 +9,13 @@
 
 class Demodder {
     private:
+    unsigned int decimate = 1;
     IQueue<unsigned char*>* sampleQueue;
     std::atomic<bool>* quit;
-    std::vector<float> fmSamples;
+    std::vector<double> fmSamples;
     std::unique_ptr<FFTFilter> filter;
     public:
-    AudioFile<float> a;
+    AudioFile<double> a;
     Demodder(IQueue<unsigned char*>* q, std::atomic<bool>* quit);
     ~Demodder();
     void demodulate();

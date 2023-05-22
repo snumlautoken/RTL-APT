@@ -8,16 +8,16 @@ void Demodder::demodulate() {
     double real0 = 1;
     double imag0 = 1;
     std::ifstream inFile("test.bin", std::ios::binary);
-    u_char buf[16*32*512];
+    u_char* buf = (u_char*)malloc(ARR_SIZE*2);
     while (true) {
-        inFile.read((char*)buf, 16*32*512);
+        inFile.read((char*)buf, 2*ARR_SIZE);
         if (inFile.rdstate() & inFile.eofbit) {break;}
 
         std::cout << std::hex << std::showbase << buf[0] << std::endl;
 
         std::array<std::complex<double>, 2*ARR_SIZE> arr = filter->filter(buf);
 
-        for (u_long i = 0; i < ARR_SIZE; i += 10) {
+        for (u_long i = 0; i < ARR_SIZE; i += 1) {
             double real1 = arr[i].real();
             double imag1 = arr[i].imag();
             double fmSample = (real0 * (imag1 - imag0)
@@ -25,7 +25,8 @@ void Demodder::demodulate() {
                             /(real0 * real0 + imag0 * imag0);
             real0 = real1;
             imag0 = imag1;
-            a.samples[0].push_back(fmSample);
+                if (i % 10 == 0)
+                    a.samples[0].push_back(fmSample);
         }
     }
 }
@@ -35,7 +36,7 @@ Demodder::Demodder(IQueue<unsigned char*>* q, std::atomic<bool>* quit) : quit(qu
     sampleQueue = q;
     a.setNumChannels(1);
     a.isMono();
-    a.setSampleRate(250000/10);
+    a.setSampleRate(25000);
 }
 
 Demodder::~Demodder() {
