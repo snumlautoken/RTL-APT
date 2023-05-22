@@ -13,7 +13,7 @@ void Demodder::demodulate() {
         inFile.read((char*)buf, 2*ARR_SIZE);
         if (inFile.rdstate() & inFile.eofbit) {break;}
 
-        std::cout << std::hex << std::showbase << buf[0] << std::endl;
+        std::cout << buf[0] << std::endl;
 
         compArray* arr = filter->filter(buf);
 
@@ -25,8 +25,8 @@ void Demodder::demodulate() {
                             /(real0 * real0 + imag0 * imag0);
             real0 = real1;
             imag0 = imag1;
-                if (i % 10 == 0)
-                    a.samples[0].push_back(fmSample);
+            if (i % 10 == 0)
+                a.samples[0].push_back(fmSample);
         }
     }
 }
