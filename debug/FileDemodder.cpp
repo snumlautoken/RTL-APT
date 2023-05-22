@@ -15,11 +15,11 @@ void Demodder::demodulate() {
 
         std::cout << std::hex << std::showbase << buf[0] << std::endl;
 
-        std::array<std::complex<double>, 2*ARR_SIZE> arr = filter->filter(buf);
+        compArray* arr = filter->filter(buf);
 
         for (u_long i = 0; i < ARR_SIZE; i += 1) {
-            double real1 = arr[i].real();
-            double imag1 = arr[i].imag();
+            double real1 = (*arr)[i].real();
+            double imag1 = (*arr)[i].imag();
             double fmSample = (real0 * (imag1 - imag0)
                             - imag0 * (real1 - real0))
                             /(real0 * real0 + imag0 * imag0);

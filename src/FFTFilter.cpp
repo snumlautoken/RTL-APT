@@ -2,7 +2,7 @@
 #include "../debug/SampleFilters.h"
 #include <memory>
 
-compArray FFTFilter::filter(unsigned char input[ARR_SIZE*2]) {
+compArray* FFTFilter::filter(unsigned char input[ARR_SIZE*2]) {
     for (int i = 0; i < ARR_SIZE*2; i+=2) {
         sampleArr[i/2] = std::complex<double>(double(input[i])-127.5, double(input[i+1])-127.5);
         sampleArr[ARR_SIZE+i/2] = 0;
@@ -20,7 +20,7 @@ compArray FFTFilter::filter(unsigned char input[ARR_SIZE*2]) {
         sampleArr[i] /= ARR_SIZE*2;
     }
 
-    return sampleArr;
+    return &sampleArr;
 }
 
 FFTFilter::FFTFilter(unsigned int filterLength, int freqCutoff) 

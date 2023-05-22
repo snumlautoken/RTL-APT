@@ -16,6 +16,6 @@ class FFTFilter {
     compArray sampleArr, filterOut;
     fftw_plan p, ip;
     public:
-    compArray filter(unsigned char input[ARR_SIZE*2]);
+    compArray* filter(unsigned char input[ARR_SIZE*2]);
     FFTFilter(unsigned int filterLength, int freqCutoff);
 };
