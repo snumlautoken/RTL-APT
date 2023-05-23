@@ -5,30 +5,28 @@
 #include <memory>
 
 void Demodder::demodulate() {
-    double real0 = 1;
-    double imag0 = 1;
-    std::ifstream inFile("test.bin", std::ios::binary);
+    std::ifstream inFile("xab", std::ios::binary);
     u_char* buf = (u_char*)malloc(ARR_SIZE*2);
     while (true) {
         inFile.read((char*)buf, 2*ARR_SIZE);
         if (inFile.rdstate() & inFile.eofbit) {break;}
 
-        std::cout << buf[0] << std::endl;
-
         compArray* arr = filter->filter(buf);
 
-        for (u_long i = 0; i < ARR_SIZE; i += 1) {
-            double real1 = (*arr)[i].real();
-            double imag1 = (*arr)[i].imag();
+        for (u_long i = ARR_START; i < ARR_END-1; i++) {
+            double real0 = (*arr)[i].real();
+            double imag0 = (*arr)[i].imag();
+            double real1 = (*arr)[i+1].real();
+            double imag1 = (*arr)[i+1].imag();
             double fmSample = (real0 * (imag1 - imag0)
                             - imag0 * (real1 - real0))
                             /(real0 * real0 + imag0 * imag0);
-            real0 = real1;
-            imag0 = imag1;
-            if (i % 10 == 0)
+            if (i % decimate == 0)
                 a.samples[0].push_back(fmSample);
         }
     }
+
+    std::cout << "FINISHED" << std::endl;
 }
 
 
@@ -36,7 +34,7 @@ Demodder::Demodder(IQueue<unsigned char*>* q, std::atomic<bool>* quit) : quit(qu
     sampleQueue = q;
     a.setNumChannels(1);
     a.isMono();
-    a.setSampleRate(25000);
+    a.setSampleRate(250000);
 }
 
 Demodder::~Demodder() {
